@@ -15,6 +15,33 @@ var storage = multer.diskStorage({
 
 var upload = multer({ storage: storage });
 
+food_itemRouter.get('/view-restaurant-added-food-item/:id', async function (req, res) {
+  try {
+    const id = req.params.id
+    console.log(id);
+    const allUser = await food_itemModel.find({restaurant_id:id})
+    console.log(allUser);
+    if (!allUser) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "No data exist"
+      })
+    }
+    return res.status(200).json({
+      success: true,
+      error: false,
+      data: allUser
+    })
+  } catch (error) {
+    return res.status(400).json({
+      success: true,
+      error: false,
+      message: "Something went wrong"
+    })
+  }
+})
+
 food_itemRouter.post('/upload', upload.single("file"), (req, res) => {
   console.log("jh", req.file.filename);
   return res.json("file uploaded");
