@@ -63,6 +63,7 @@ class _LoginState extends State<Login> {
       localStorage = await SharedPreferences.getInstance();
       localStorage.setString('role', role.toString());
       localStorage.setString('login_id', json.encode(body['login_id']));
+      localStorage.setString('restaurant_id', json.encode(body['restaurant_id']));
       localStorage.setString('username', username.toString());
 
       print('login_idss ${json.encode(body['login_id'])}');

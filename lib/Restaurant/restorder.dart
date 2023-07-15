@@ -8,6 +8,7 @@ import 'package:http/http.dart'as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../API/api.dart';
 import '../API/api_service.dart';
@@ -34,16 +35,19 @@ class _ManageitemState extends State<Manageitem> {
   final picker = ImagePicker();
   ApiService client = ApiService();
 
+  late String user_id;
+  late SharedPreferences prefs;
   bool _isLoading = false;
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _itemPriceController = TextEditingController();
-  final List<String> entries = <String>[
-    ' Chicken Biriyani',
-    'Porotta',
-    'Chicken Noodles',
-    'Masaladosa'
-  ];
-  final List<String> prices = ['150', '15', '60', '120'];
+  @override
+  void dispose() {
+    _image=='';
+    _itemNameController.dispose();
+    _itemPriceController.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
   Future getImage() async {
     print("picked");
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -62,11 +66,15 @@ class _ManageitemState extends State<Manageitem> {
     });
   }
   void addproduct() async {
+    prefs = await SharedPreferences.getInstance();
+    user_id = (prefs.getString('restaurant_id') ?? '');
+
     setState(() {
       _isLoading = true;
     });
 
     var data = {
+      "restaurant_id":user_id.replaceAll('"', '') ,
       "item_name": _itemNameController.text,
       "price": _itemPriceController.text,
       "item_image":_filename
@@ -82,7 +90,7 @@ class _ManageitemState extends State<Manageitem> {
         backgroundColor: Colors.grey,
       );
 
-      Navigator.push(context as BuildContext, MaterialPageRoute(builder: (context) => Manageitem()));
+     // Navigator.push(context, MaterialPageRoute(builder: (context) => Manageitem()));
     } else {
       Fluttertoast.showToast(
         msg: body['message'].toString(),
@@ -240,8 +248,8 @@ class _ManageitemState extends State<Manageitem> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                height: 50,
-                                width: 50,
+                                height: 60,
+                                width: 60,
                                 decoration: BoxDecoration(
                                   image: DecorationImage(
                                     image: AssetImage("server/public/images/"+snapshot.data![index].item_image),
@@ -252,7 +260,7 @@ class _ManageitemState extends State<Manageitem> {
                                 children: [
                                   Text(
 
-                                    'item_name: ${snapshot.data![index].itemname}',
+                                    ' ${snapshot.data![index].itemname}',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16.183,
