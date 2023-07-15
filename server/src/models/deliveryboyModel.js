@@ -4,11 +4,11 @@ const schema = mongoose.Schema
 
 const deliveyboySchema = new schema({
     login_id: { type: mongoose.Types.ObjectId, ref:'login_tb' },
+    restaurant_id: { type: mongoose.Types.ObjectId, ref:'restaurant_tb' },
     firstname: { type: String },
     lastname: { type: String },
     Phone_no: { type: String },
     email: { type: String },
-    password: { type: String },
     
 
 

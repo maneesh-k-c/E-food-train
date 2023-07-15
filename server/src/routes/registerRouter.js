@@ -4,7 +4,9 @@ const userModel = require('../models/userModel');
 const restaurantModel = require('../models/restaurantModel');
 const pantryModel = require('../models/pantryModel');
 const deliveyboyModel = require('../models/deliveryboyModel');
+const mongoose = require('mongoose');
 
+const obj = mongoose.Types.ObjectId
 const registerRouter = express.Router();
 
 
@@ -192,21 +194,21 @@ registerRouter.post('/deliveryboy-register', async function (req, res) {
       })
     }
     const log_data = {
-      username: req.body.user_name,
+      username: req.body.username,
       password: req.body.password,
       role: 4,
-      status: 0,
+      status: 1,
     }
     const save_login = await loginModel(log_data).save()
     if (save_login) {
       const deliveryboy_data = {
         login_id: save_login._id,
-        firstname: req.body.first_name,
-        lastname: req.body.last_name,
-        Phone_no: req.body.phone_no,
+        restaurant_id: req.body.restaurant_id,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        Phone_no: req.body.Phone_no,
         email: req.body.email,
-
-
+        address: req.body.address
       }
       const save_user = await deliveyboyModel(deliveryboy_data).save()
       if (save_user) {
@@ -403,9 +405,9 @@ registerRouter.get('/reject/:id', async (req, res) => {
     });
   }
 });
-registerRouter.get('/view-deliveryboyapprove', async function (req, res) {
+registerRouter.get('/view-deliveryboy/:id', async function (req, res) {
   try {
-
+    const id = req.params.id
     const allUser = await deliveyboyModel.aggregate([
       {
         '$lookup': {
@@ -416,19 +418,18 @@ registerRouter.get('/view-deliveryboyapprove', async function (req, res) {
         }
 
       },
-      {
-        '$match': {
-          "login.status": '0'
-        }
-      },
+     
       {
         '$unwind': "$login"
       },
       {
+        '$match':{
+          'restaurant_id':new obj(id)
+        }
+      },
+      {
         '$group': {
           '_id': '$_id',
-
-
           'id': { '$first': '$_id' },
           'logid': { '$first': '$login._id' },
           'first_name': { '$first': '$firstname' },
@@ -437,9 +438,6 @@ registerRouter.get('/view-deliveryboyapprove', async function (req, res) {
           'status': { '$first': '$login.status' },
           'email': { '$first': '$email' },
           'username': { '$first': '$login.username' },
-
-
-
         }
       }
     ])
@@ -467,6 +465,7 @@ registerRouter.get('/view-deliveryboyapprove', async function (req, res) {
     })
   }
 })
+
 registerRouter.get('/view-deliveryboy', async function (req, res) {
   try {
 
@@ -547,6 +546,37 @@ registerRouter.get('/approve/:id', async (req, res) => {
       });
     } else {
       throw new Error('Error updating user');
+    }
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Something went wrong',
+      details: error.message,
+    });
+  }
+});
+registerRouter.get('/delete-delivery-boy/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const reject = await loginModel.deleteOne({ _id: id });
+
+    if (reject && reject.deletedCount === 1) {
+      const reject1 = await deliveyboyModel.deleteOne({ login_id: id });
+      if(reject1.deletedCount==1){
+        return res.status(200).json({
+          success: true,
+          message: 'Delivery boy deleted',
+        });
+      }
+     
+    } else if (reject && reject.deletedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Delivery not found or already rejected',
+      });
+    } else {
+      throw new Error('Error deleting delivery boy');
     }
   } catch (error) {
     return res.status(400).json({
