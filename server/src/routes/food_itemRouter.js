@@ -49,7 +49,7 @@ food_itemRouter.get('/view-item', async (req, res) => {
 food_itemRouter.post('/food_item', async function (req, res) {
   try {
     const data = {
-      item_id: req.body.item_id,
+      restaurant_id: req.body.restaurant_id,
       item_name: req.body.item_name,
       price: req.body.price,
       item_image: req.body.item_image,
