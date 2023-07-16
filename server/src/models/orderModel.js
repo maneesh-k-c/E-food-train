@@ -4,7 +4,8 @@ const schema = mongoose.Schema
 
 const orderSchema = new schema({
     user_id: { type: mongoose.Types.ObjectId, ref:'user_tb' },
-    order_id: { type: String },
+    food_id: { type: mongoose.Types.ObjectId, ref:'food_item_tb' },
+    restaurant_id: { type: mongoose.Types.ObjectId, ref:'restaurant_tb' },
     name: { type: String },
     mobile_no: { type: String },
     train_name: { type: String },

@@ -97,7 +97,7 @@ registerRouter.post('/restaurant-register', async function (req, res) {
         login_id: save_login._id,
         restaurantname: req.body.name,
         Phone_no: req.body.phone_no,
-        location: req.location,
+        location: req.body.location,
         email: req.body.email,
 
       }
