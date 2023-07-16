@@ -9,6 +9,46 @@ const mongoose = require('mongoose');
 const obj = mongoose.Types.ObjectId
 const registerRouter = express.Router();
 
+registerRouter.get('/update-deliveryboy/:id', async function (req, res) {
+  try {
+    const id = req.params.id
+    const deliveryboy_data = {
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      Phone_no: req.body.Phone_no,
+      email: req.body.email,
+      address: req.body.address
+    }
+    const allUser = await deliveyboyModel.updateOne({_id:id},{$set:deliveryboy_data})
+    if (allUser.modifiedCount==1) {
+      return res.status(200).json({
+        success: true,
+        error: false,
+        data: allUser,
+        message:"updated"
+      })
+     
+    }else{
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Error"
+      })
+    }
+   
+
+
+
+
+  } catch (error) {
+    return res.status(400).json({
+      success: true,
+      error: false,
+      message: "Something went wrong"
+    })
+  }
+})
+
 
 registerRouter.post('/user-register', async function (req, res) {
   try {
@@ -438,6 +478,7 @@ registerRouter.get('/view-deliveryboy/:id', async function (req, res) {
           'status': { '$first': '$login.status' },
           'email': { '$first': '$email' },
           'username': { '$first': '$login.username' },
+          'address': { '$first': '$address' },
         }
       }
     ])
