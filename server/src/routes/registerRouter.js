@@ -507,6 +507,68 @@ registerRouter.get('/view-deliveryboy/:id', async function (req, res) {
   }
 })
 
+registerRouter.get('/view-deliveryboy-single/:id', async function (req, res) {
+  try {
+    const id = req.params.id
+    const allUser = await deliveyboyModel.aggregate([
+      {
+        '$lookup': {
+          'from': 'login_tbs',
+          'localField': 'login_id',
+          'foreignField': '_id',
+          'as': 'login'
+        }
+
+      },
+     
+      {
+        '$unwind': "$login"
+      },
+      {
+        '$match':{
+          '_id':new obj(id)
+        }
+      },
+      {
+        '$group': {
+          '_id': '$_id',
+          'id': { '$first': '$_id' },
+          'logid': { '$first': '$login._id' },
+          'first_name': { '$first': '$firstname' },
+          'last_name': { '$first': '$lastname' },
+          'Phone_no': { '$first': '$Phone_no' },
+          'status': { '$first': '$login.status' },
+          'email': { '$first': '$email' },
+          'username': { '$first': '$login.username' },
+          'address': { '$first': '$address' },
+        }
+      }
+    ])
+    if (!allUser) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "No data exist"
+      })
+    }
+    return res.status(200).json({
+      success: true,
+      error: false,
+      data: allUser
+    })
+
+
+
+
+  } catch (error) {
+    return res.status(400).json({
+      success: true,
+      error: false,
+      message: "Something went wrong"
+    })
+  }
+})
+
 registerRouter.get('/view-deliveryboy', async function (req, res) {
   try {
 
