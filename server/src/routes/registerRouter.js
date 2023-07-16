@@ -185,7 +185,7 @@ registerRouter.post('/deliveryboy-register', async function (req, res) {
         message: "User already exist"
       })
     }
-    const oldPhone = await deliveyboyModel.findOne({ phone_no: req.body.phone_no })
+    const oldPhone = await deliveyboyModel.findOne({ Phone_no: req.body.Phone_no })
     if (oldPhone) {
       return res.status(400).json({
         success: true,
