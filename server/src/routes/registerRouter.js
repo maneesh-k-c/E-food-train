@@ -499,6 +499,7 @@ registerRouter.get('/view-deliveryboy', async function (req, res) {
           'status': { '$first': '$login.status' },
           'email': { '$first': '$email' },
           'username': { '$first': '$login.username' },
+          'address': { '$first': '$address' },
 
 
 

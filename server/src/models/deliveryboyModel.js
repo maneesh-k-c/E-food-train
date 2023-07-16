@@ -9,6 +9,7 @@ const deliveyboySchema = new schema({
     lastname: { type: String },
     Phone_no: { type: String },
     email: { type: String },
+    address: { type: String },
     
 
 
