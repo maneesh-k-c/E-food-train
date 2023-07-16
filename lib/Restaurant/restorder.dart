@@ -35,18 +35,21 @@ class _ManageitemState extends State<Manageitem> {
   final picker = ImagePicker();
   ApiService client = ApiService();
 
-  late String user_id;
+   String user_id='';
   late SharedPreferences prefs;
   bool _isLoading = false;
   final TextEditingController _itemNameController = TextEditingController();
   final TextEditingController _itemPriceController = TextEditingController();
-  @override
-  void dispose() {
-    _image=='';
-    _itemNameController.dispose();
-    _itemPriceController.dispose();
-    // TODO: implement dispose
-    super.dispose();
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchid();
+  }
+  Future<void> fetchid()async{
+    prefs = await SharedPreferences.getInstance();
+    user_id = (prefs.getString('restaurant_id') ?? '');
+    print("uid${user_id}");
   }
   Future getImage() async {
     print("picked");
@@ -226,12 +229,10 @@ class _ManageitemState extends State<Manageitem> {
               ),
             ),
             FutureBuilder<List<itemModel>>(
-              future: client.fetchitem(),
+              future: client.fetchitem(user_id.replaceAll('"', '')),
               builder: (BuildContext cfetchproductontext,
                   AsyncSnapshot<List<itemModel>> snapshot) {
 
-                print("snap${snapshot}");
-                print("snap${prices}");
                 if (snapshot.hasData) {
                   return ListView.separated(
                     physics: NeverScrollableScrollPhysics(),

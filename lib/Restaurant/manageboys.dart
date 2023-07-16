@@ -1,6 +1,11 @@
+import 'dart:convert';
+
+import 'package:efoodtrain/API/api.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:quantity_input/quantity_input.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class manageboys extends StatefulWidget {
   const manageboys({Key? key}) : super(key: key);
@@ -23,13 +28,110 @@ final List<String> entries = <String>['Sudheepth', 'Vishnu', 'Shamliya','Manu',]
 final List<String> number=['7902647562','9745073559','9633611017','8086939350',];
 class _manageboysState extends State<manageboys> {
 
+  late SharedPreferences prefs;
+  late String rest_id;
   final _formKey = GlobalKey<FormState>();
+  TextEditingController _userController = TextEditingController();
+  TextEditingController _pwdController = TextEditingController();
   TextEditingController _nameController = TextEditingController();
-  TextEditingController _ageController = TextEditingController();
+  TextEditingController _mailController = TextEditingController();
+  TextEditingController _lastController = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
+  TextEditingController _addController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+  List _loadedRest = [];
+  void registerDeliveryboy()async {
+    prefs = await SharedPreferences.getInstance();
 
+    rest_id = (prefs.getString('restaurant_id') ?? '');
+    print('login_rest ${rest_id}');
+
+    var data = {
+      "restaurant_id":rest_id.replaceAll('"', '') ,
+      "username": _userController.text,
+      "password": _pwdController.text,
+      "firstname": _nameController.text,
+      "lastname": _lastController.text,
+      "Phone_no": _phoneController.text,
+      "email": _mailController.text,
+      "address": _addController.text,
+    };
+    print(data);
+    var res = await Api().authData(data,'/register/deliveryboy-register');
+    var body = json.decode(res.body);
+print(body);
+    if(body['success']==true)
+    {
+      print(body);
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Successful'),
+            content: Text(
+              'deliveryboy added successfully',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>manageboys()));
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+
+      );
+
+    }
+    else
+    {
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+
+    }
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //  _fetchData();
+  }
+
+  _fetchData() async {
+   prefs = await SharedPreferences.getInstance();
+
+  rest_id = (prefs.getString('restaurant_id') ?? '');
+    print('login_rest ${rest_id}');
+
+    var res = await Api().getData('/register/view-deliveryboy/'+rest_id.replaceAll('"', ''));
+    //  print(res);
+    if (res.statusCode == 200) {
+      var items = json.decode(res.body)['data'];
+      //   print(items);
+      setState(() {
+        _loadedRest = items;
+
+        print('itemsloaded${_loadedRest}');
+      });
+    } else {
+      setState(() {
+        _loadedRest = [];
+        Fluttertoast.showToast(
+          msg: "Currently there is no tenders available",
+          backgroundColor: Colors.grey,
+        );
+      });
+    }
+  }
   void _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -190,101 +292,17 @@ class _manageboysState extends State<manageboys> {
       floatingActionButton: FloatingActionButton(
           onPressed: () {
       showModalBottomSheet(
+        isScrollControlled: true,
         context: context,
-        builder: (context) {
-          return SingleChildScrollView(
-            child: Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: InputDecoration(
-                              labelText: 'Name',
-                            ),
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter your name';
-                              }
-                              return null;
-                            },
-                          ),
-                          SizedBox(height: 16.0),
-                          TextFormField(
-                            controller: _phoneController,
-                            decoration: InputDecoration(
-                              labelText: 'phone number',
-                            ),
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter your phone number';
-                              }
-                              return null;
-                            },
-                          ),
-                          SizedBox(height: 16.0),
-                          TextFormField(
-                            controller: _ageController,
-                            decoration: InputDecoration(
-                              labelText: 'age',
-                            ),
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter your age';
-                              }
-                              return null;
-                            },
-                          ),
-                          SizedBox(height: 16.0),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                // Perform the booking operation
-                                String name = _nameController.text;
-                                String email = _ageController.text;
-                                String phone = _phoneController.text;
+        builder: (BuildContext ctx){
+          return Padding(
+            padding: EdgeInsets.only(
+                top: 20,
+                left: 20,
+                right: 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20),
 
-                                // TODO: Perform the booking operation using the entered data
-                                Navigator.pop(context);
-                                // Show a dialog to indicate successful booking
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Successful'),
-                                      content: Text(
-                                        'deliveryboy added successfully',
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text('OK'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-
-                                );
-                              }
-                            },
-                            child: Text('Add'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: buildExpanded(context),
           );
         },
       );
@@ -293,6 +311,122 @@ class _manageboysState extends State<manageboys> {
 
           child: Icon(Icons.add),
       ),
+    );
+  }
+
+  SingleChildScrollView buildExpanded(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+            mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Center(child: Text("Add Delivery Boys",style: TextStyle(fontSize: 20),)),
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'FirstName',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter first name';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.0), TextFormField(
+                        controller: _lastController,
+                        decoration: InputDecoration(
+                          labelText: 'LastName',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter last name';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(
+                          labelText: 'phone number',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your phone number';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _mailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter email address';
+                          }
+                          return null;
+                        },
+                      ),  SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _addController,
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter  address';
+                          }
+                          return null;
+                        },
+                      ), SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _userController,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter username';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 16.0),
+                      TextFormField(
+                        controller: _pwdController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter email password';
+                          }
+                          return null;
+                        },
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          registerDeliveryboy();
+                        },
+                        child: Text('Add'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
     );
   }
 }

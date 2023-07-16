@@ -82,8 +82,8 @@ class ApiService {
       return products;
     }
   }
-  Future<List<deliveryboyModel>> fetchdeliveryboy() async {
-    var response = await Api().getData('/register/view-deliveryboy');
+  Future<List<deliveryboyModel>> fetchdeliveryboy(String id) async {
+    var response = await Api().getData('/register/view-deliveryboy/'+id);
     if (response.statusCode == 200) {
       var items = json.decode(response.body);
       print((items));
@@ -126,8 +126,8 @@ class ApiService {
       return products;
     }
     }
-  Future<List<itemModel>> fetchitem() async {
-    var response = await Api().getData('/food_item/view-item');
+  Future<List<itemModel>> fetchitem(String id) async {
+    var response = await Api().getData('/food_item/view-restaurant-added-food-item/'+id);
     if (response.statusCode == 200) {
       var items = json.decode(response.body);
       print(("items${items}"));
