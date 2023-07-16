@@ -8,6 +8,7 @@ const restaurantSchema = new schema({
     Phone_no: { type: String },
     location: { type: String },
     email: { type: String },
+    station_name: { type: String },
 
     
 

@@ -48,8 +48,6 @@ registerRouter.get('/update-deliveryboy/:id', async function (req, res) {
     })
   }
 })
-
-
 registerRouter.post('/user-register', async function (req, res) {
   try {
     const oldUser = await loginModel.findOne({ username: req.body.user_name })
@@ -139,6 +137,7 @@ registerRouter.post('/restaurant-register', async function (req, res) {
         Phone_no: req.body.phone_no,
         location: req.body.location,
         email: req.body.email,
+        station_name:new RegExp('.*' + req.body.station_name.toLowerCase() + '.*'),
 
       }
       const save_user = await restaurantModel(restaurant_data).save()
@@ -506,7 +505,6 @@ registerRouter.get('/view-deliveryboy/:id', async function (req, res) {
     })
   }
 })
-
 registerRouter.get('/view-deliveryboy-single/:id', async function (req, res) {
   try {
     const id = req.params.id
@@ -568,7 +566,6 @@ registerRouter.get('/view-deliveryboy-single/:id', async function (req, res) {
     })
   }
 })
-
 registerRouter.get('/view-deliveryboy', async function (req, res) {
   try {
 
