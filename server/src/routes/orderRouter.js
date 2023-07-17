@@ -245,7 +245,68 @@ orderRouter.post('/save-order/:id', async (req, res) => {
   try {
     const id = req.params.id
     console.log(id);
-    const carts = await cartModel.find({ user_id: id, status:0 })
+    const carts = await  cartModel.aggregate([
+      {
+        '$lookup': {
+          'from': 'user_tbs',
+          'localField': 'user_id',
+          'foreignField': '_id',
+          'as': 'user'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'restaurant_tbs',
+          'localField': 'restaurant_id',
+          'foreignField': '_id',
+          'as': 'restaurant'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'food_item_tbs',
+          'localField': 'food_id',
+          'foreignField': '_id',
+          'as': 'food'
+        }
+
+      },
+      {
+        '$unwind': "$user"
+      },
+      {
+        '$unwind': "$food"
+      },
+      {
+        '$unwind': "$restaurant"
+      },
+      {
+        '$match': {
+          "status": '0'
+        }
+      },
+      {
+        '$match': {
+          "user_id": new obj(id)
+        }
+      },
+      {
+        '$group': {
+          '_id': '$_id',
+          'user_id': { '$first': '$user_id' },
+          'food_id': { '$first': '$food_id' },
+          'restaurant_id': { '$first': '$restaurant_id' },
+          'quantity': { '$first': '$quantity' },
+          'item_name': { '$first': '$food.item_name' },
+          'price': { '$first': '$food.price' },
+          'item_image': { '$first': '$food.item_image' },
+          'status': { '$first': '$status' },
+
+        }
+      }
+    ])
     console.log(carts);
     carts.forEach((item) => {
       item.food_price = item.price * item.quantity;
