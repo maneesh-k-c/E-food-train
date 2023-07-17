@@ -33,7 +33,7 @@ class _CartState extends State<Cart> {
   ApiService client=ApiService();
   late SharedPreferences prefs;
   String user_id='';
-  int total=0;
+   int? total;
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -47,8 +47,11 @@ class _CartState extends State<Cart> {
     if (response.statusCode == 200) {
       var items = json.decode(response.body);
       print(("items${items}"));
-      total=items['totalPrice'];
-      print("TotalAmount${total}");
+
+      setState(() {
+        total=items['totalPrice'];
+        print("TotalAmount${total}");
+      });
       List<CartModel> products = List<CartModel>.from(
           items['data'].map((e) => CartModel.fromJson(e)).toList());
       return products;
@@ -111,8 +114,8 @@ class _CartState extends State<Cart> {
       print(body);
       setState(() {
         // qty++;
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Cart()));
+     /*   Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => Cart()));*/
       });
       // Fluttertoast.showToast(
       //   msg: body['message'].toString(),
@@ -139,9 +142,9 @@ class _CartState extends State<Cart> {
       print(body);
       setState(() {
         //  qty--;
-        Navigator.pushReplacement(
+      /*  Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => Cart()));
-      });
+    */  });
       // Fluttertoast.showToast(
       //   msg: body['message'].toString(),
       //   backgroundColor: Colors.grey,
@@ -173,7 +176,7 @@ class _CartState extends State<Cart> {
     if (body['success'] == true) {
 
       Navigator.push(
-        context,MaterialPageRoute(builder: (context)=>Restpay()),);
+        context,MaterialPageRoute(builder: (context)=>Restpay(total!)),);
       print(body);
       Fluttertoast.showToast(
         msg: body['message'].toString(),

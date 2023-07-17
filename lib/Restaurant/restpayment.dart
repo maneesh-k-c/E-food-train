@@ -7,6 +7,10 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 
 
 class Restpay extends  StatefulWidget {
+  final int id;
+
+  Restpay(this.id);
+
   @override
   State<Restpay> createState() => _RestpayState();
 }
@@ -75,7 +79,7 @@ class _RestpayState extends State<Restpay> {
                           children:[
                             Center(
                               child: Text(
-                                "Total Amount:Rs300",
+                                "Total Amount:Rs"+widget.id.toString(),
                                 style: TextStyle(
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.bold,

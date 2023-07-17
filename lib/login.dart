@@ -93,11 +93,11 @@ class _LoginState extends State<Login> {
         print('data: $data');
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => Resthome()));
-      } else if (pantry == role.replaceAll('"', '') && storedvalue == status.replaceAll('"', '')) {
+      }/* else if (pantry == role.replaceAll('"', '') && storedvalue == status.replaceAll('"', '')) {
         print('data: $data');
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => Pantryhome()));
-      }
+      }*/
       else if (deliveryboy == role.replaceAll('"', '') && storedvalue == status.replaceAll('"', '')) {
         print('data: $data');
         Navigator.of(context)
