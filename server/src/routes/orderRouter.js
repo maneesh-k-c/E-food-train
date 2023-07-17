@@ -71,21 +71,21 @@ orderRouter.get('/delete-cart/:id', async function (req, res) {
   try {
     const id = req.params.id;
 
-    const item = await cartModel.deleteOne({_id:id});
+    const item = await cartModel.deleteOne({ _id: id });
 
-    if (item.deletedCount==1) {
+    if (item.deletedCount == 1) {
       return res.status(200).json({
         success: true,
         error: false,
         message: "Cart item deleted"
       });
-    }else{
+    } else {
       return res.status(400).json({
         success: false,
         error: true,
         message: "Something went wrong"
       });
-    }  
+    }
 
   } catch (error) {
     return res.status(400).json({
@@ -157,7 +157,7 @@ orderRouter.get('/view-cart/:id', async function (req, res) {
           'price': { '$first': '$food.price' },
           'item_image': { '$first': '$food.item_image' },
           'status': { '$first': '$status' },
-         
+
         }
       }
     ])
@@ -167,10 +167,10 @@ orderRouter.get('/view-cart/:id', async function (req, res) {
     });
 
     let totalPrice = 0;
-  
-  for (let i = 0; i < allUser.length; i++) {
-    totalPrice += allUser[i].total;
-  }
+
+    for (let i = 0; i < allUser.length; i++) {
+      totalPrice += allUser[i].total;
+    }
 
     if (!allUser) {
       return res.status(400).json({
@@ -182,9 +182,9 @@ orderRouter.get('/view-cart/:id', async function (req, res) {
     return res.status(200).json({
       success: true,
       error: false,
-      totalPrice:totalPrice,
+      totalPrice: totalPrice,
       data: allUser,
-     
+
     })
 
 
@@ -202,7 +202,7 @@ orderRouter.get('/view-cart/:id', async function (req, res) {
 orderRouter.post('/add-cart', async function (req, res) {
   try {
 
-    const oldUser = await cartModel.findOne({ user_id: req.body.user_id,food_id: req.body.food_id,restaurant_id: req.body.restaurant_id,status: '0' })
+    const oldUser = await cartModel.findOne({ user_id: req.body.user_id, food_id: req.body.food_id, restaurant_id: req.body.restaurant_id, status: '0' })
     if (oldUser) {
       return res.status(400).json({
         success: false,
@@ -212,16 +212,16 @@ orderRouter.post('/add-cart', async function (req, res) {
     }
 
     const data = {
-      user_id: req.body.user_id,    
-      food_id: req.body.food_id,  
+      user_id: req.body.user_id,
+      food_id: req.body.food_id,
       restaurant_id: req.body.restaurant_id,
-      quantity: 1, 
+      quantity: 1,
       status: '0',
     };
 
     const savedData = await cartModel(data).save();
     console.log(savedData);
-    
+
     if (savedData) {
       return res.status(200).json({
         success: true,
@@ -242,22 +242,22 @@ orderRouter.post('/add-cart', async function (req, res) {
 orderRouter.post('/order', async function (req, res) {
   try {
     const data = {
-      user_id: req.body.user_id, 
-   
-      order_id: req.body.order_id,  
+      user_id: req.body.user_id,
+
+      order_id: req.body.order_id,
       name: req.body.name,
-      mobile_no: req.body.mobile_no,  
+      mobile_no: req.body.mobile_no,
       train_name: req.body.train_name,
-      pnr_no: req.body.pnr_no,  
+      pnr_no: req.body.pnr_no,
       time: req.body.time,
-      date: req.body.date,  
-      total: req.body.total,  
+      date: req.body.date,
+      total: req.body.total,
       status: req.body.status,
     };
 
     const savedData = await orderModel(data).save();
     console.log(savedData);
-    
+
     if (savedData) {
       return res.status(200).json({
         success: true,
