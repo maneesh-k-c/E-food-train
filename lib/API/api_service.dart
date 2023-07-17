@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 
+import 'package:efoodtrain/Restaurant/model/boymodel.dart';
 import 'package:efoodtrain/admin/model/adddeliveymodel.dart';
 import 'package:efoodtrain/admin/model/deliveryboymodel.dart';
 import 'package:efoodtrain/admin/model/itemmodel.dart';
@@ -51,7 +52,6 @@ class ApiService {
       return products;
     }
   }
-
   Future<List<RestaurentModel>> fetchrestaurent() async {
     var response = await Api().getData('/register/view-restaurant');
     if (response.statusCode == 200) {
@@ -82,18 +82,18 @@ class ApiService {
       return products;
     }
   }
-  Future<List<deliveryboyModel>> fetchdeliveryboy(String id) async {
+  Future<List<deliveryBoyModel>> fetchdeliveryboy(String id) async {
     var response = await Api().getData('/register/view-deliveryboy/'+id);
     if (response.statusCode == 200) {
       var items = json.decode(response.body);
       print((items));
 
 
-      List<deliveryboyModel> products = List<deliveryboyModel>.from(
-          items['data'].map((e) => deliveryboyModel.fromJson(e)).toList());
+      List<deliveryBoyModel> products = List<deliveryBoyModel>.from(
+          items['data'].map((e) => deliveryBoyModel.fromJson(e)).toList());
       return products;
     } else {
-      List<deliveryboyModel> products = [];
+      List<deliveryBoyModel> products = [];
       return products;
     }
   }

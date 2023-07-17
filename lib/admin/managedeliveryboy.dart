@@ -193,7 +193,7 @@ late String userid;
 
               ),
             ),
-          FutureBuilder<List<deliveryboyModel>>(
+      /*    FutureBuilder<List<deliveryboyModel>>(
               future: client.fetchdeliveryboy(),
               builder: (BuildContext context,
                   AsyncSnapshot<List<deliveryboyModel>> snapshot) {
@@ -234,7 +234,7 @@ late String userid;
           return Center(child: CircularProgressIndicator());
   }
 
-          ),
+          ),*/
         ],
         ),
       ),

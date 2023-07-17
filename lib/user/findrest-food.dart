@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:efoodtrain/API/api.dart';
 import 'package:efoodtrain/user/orderitems.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Restfood extends StatefulWidget {
   const Restfood({Key? key}) : super(key: key);
@@ -9,6 +13,43 @@ class Restfood extends StatefulWidget {
 }
 
 class _RestfoodState extends State<Restfood> {
+  List _loaddata=[];
+  @override
+  void initState(){
+    super.initState();
+    _fetchData();
+
+  }
+  _fetchData() async {
+    var res = await Api().getData('/register/view-restaurant');
+    var body = json.decode(res.body)['data'];
+    print(body);
+    setState(() {
+      _loaddata = body;
+
+    });
+    print('body${_loaddata}');
+    if(body['success']==true)
+    {
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+
+      // Navigator.push(context, MaterialPageRoute(builder: (context)=>Login()));
+
+    }
+    else
+    {
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,24 +158,36 @@ class _RestfoodState extends State<Restfood> {
                             ),
                           ),
                         ),
-                      ListView(
+                      ListView.builder(
+                        itemCount: _loaddata.length,
+                        itemBuilder: (context,index){
+                          String id=_loaddata[index]['_id'];
+                          return GestureDetector(
+                            onTap: (){
+                              Navigator.push(
+                                context,MaterialPageRoute(builder: (context)=>Order(id:_loaddata[index]['_id'])),);},
+                            child: ListTile(
+                                leading: Icon(Icons.restaurant,color: Colors.blueAccent,),
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(_loaddata[index]['restaurant_name'].toUpperCase(),
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    ), Text(_loaddata[index]['location'],
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                trailing: Icon(Icons.arrow_forward_ios,color: Colors.black,)
+                            ),
+                          );
+                        },
                         shrinkWrap: true,
-                        children: <Widget>[
-    GestureDetector(
-      onTap: (){
-          Navigator.push(
-            context,MaterialPageRoute(builder: (context)=>Order()),);},
-      child: ListTile(
-      leading: Icon(Icons.restaurant,color: Colors.blueAccent,),
-      title: Text('Ritzy',
-          style: TextStyle(
-            color: Colors.black,
-          ),
-      ),
-      trailing: Icon(Icons.arrow_forward_ios,color: Colors.black,)
-      ),
-    ),
-    ],
+
   ),
 
 

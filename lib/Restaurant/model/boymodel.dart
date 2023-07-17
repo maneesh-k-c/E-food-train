@@ -1,21 +1,23 @@
-class deliveryboyModel{
+class deliveryBoyModel{
+  final String id;
   final String uname;
   final String fname;
   final String lname;
-  final String id;
+  final String logid;
   final String pno;
   final String address;
   final String mail;
 
-  deliveryboyModel({required this.uname, required this.fname,required this.lname, required this.id, required this.pno, required this.address, required this.mail});
+  deliveryBoyModel({required this.id,required this.uname, required this.fname,required this.lname, required this.logid, required this.pno, required this.address, required this.mail});
 
 
-  factory deliveryboyModel.fromJson(Map<String, dynamic> json) {
-    return deliveryboyModel(
+  factory deliveryBoyModel.fromJson(Map<String, dynamic> json) {
+    return deliveryBoyModel(
+      id: json['_id'],
       uname: json['username'],
-      fname: json['firstname'],
-      lname: json['lastname'],
-      id: json['restaurant_id'],
+      fname: json['first_name'],
+      lname: json['last_name'],
+      logid: json['logid']==null?'':json['logid'],
       pno: json['Phone_no'],
       address: json['address'],
       mail: json['email'],

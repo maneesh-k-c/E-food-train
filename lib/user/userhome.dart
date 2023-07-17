@@ -1,3 +1,4 @@
+import 'package:efoodtrain/login.dart';
 import 'package:efoodtrain/pantry/managefood.dart';
 import 'package:efoodtrain/pantry/orderfood.dart';
 import 'package:efoodtrain/pantry/viewfood.dart';
@@ -6,6 +7,7 @@ import 'package:efoodtrain/user/orderitems.dart';
 import 'package:efoodtrain/user/usernot.dart';
 import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Homie extends StatefulWidget {
   const Homie({Key? key}) : super(key: key);
@@ -15,7 +17,26 @@ class Homie extends StatefulWidget {
 }
 
 class _HomieState extends State<Homie> {
+  String username = "";
+  String login_id = "";
 
+  late SharedPreferences prefs;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchuser();
+  }
+
+  fetchuser()async{
+    prefs = await SharedPreferences.getInstance();
+    username = (prefs.getString('username') ?? '');
+    login_id = prefs.getString('login_id') ?? '';
+    print("usr${username}");
+    print("usr${login_id}");
+
+  }
 
 
   @override
@@ -34,7 +55,21 @@ class _HomieState extends State<Homie> {
           IconButton(onPressed: (){
             Navigator.push(context, MaterialPageRoute(builder: (context)=>Usernotificaion()));
 
-          }, icon: Icon(Icons.notifications),color: Colors.blueAccent,)
+          }, icon: Icon(Icons.notifications),color: Colors.blueAccent,),
+          IconButton(
+            onPressed: ()async {
+
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false; // Get isLoggedIn value, default to false if not found
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Login()));
+            },
+            icon: Icon(Icons.logout),
+            color: Colors.blueAccent,
+          )
         ],
         backgroundColor: Colors.white,
       ),
@@ -63,7 +98,7 @@ class _HomieState extends State<Homie> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Profile name",
+                      username,
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
