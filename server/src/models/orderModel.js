@@ -7,13 +7,13 @@ const orderSchema = new schema({
     food_id: { type: mongoose.Types.ObjectId, ref:'food_item_tb' },
     restaurant_id: { type: mongoose.Types.ObjectId, ref:'restaurant_tb' },
     name: { type: String },
-    mobile_no: { type: String },
-    train_name: { type: String },
-    pnr_no: { type: String },
+    phone: { type: String },
+    train_no: { type: String },
     seat_no: { type: String },
     time: { type: String },
     date: { type: String },
-    total: { type: String },
+    food_price: { type: String },
+    totalAmount: { type: String },
     status: { type: String },
 
     

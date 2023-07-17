@@ -239,41 +239,60 @@ orderRouter.post('/add-cart', async function (req, res) {
   }
 });
 
-orderRouter.post('/order', async function (req, res) {
+
+
+productRouter.post('/save-order/:id', async (req, res) => {
   try {
-    const data = {
-      user_id: req.body.user_id,
-
-      order_id: req.body.order_id,
-      name: req.body.name,
-      mobile_no: req.body.mobile_no,
-      train_name: req.body.train_name,
-      pnr_no: req.body.pnr_no,
-      time: req.body.time,
-      date: req.body.date,
-      total: req.body.total,
-      status: req.body.status,
-    };
-
-    const savedData = await orderModel(data).save();
-    console.log(savedData);
-
-    if (savedData) {
-      return res.status(200).json({
-        success: true,
-        error: false,
-        details: savedData,
-        message: "Registration completed"
-      });
-    }
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      error: true,
-      message: "Something went wrong"
+    const id = req.params.id
+    console.log(id);
+    const carts = await cartModel.find({ user_id: id })
+    console.log(carts);
+    carts.forEach((item) => {
+      item.food_price = item.price * item.quantity;
     });
+
+    let totalAmount = 0;
+
+    for (let i = 0; i < carts.length; i++) {
+      totalAmount += carts[i].total;
+    }
+    const datas = [];
+    const dateString = new Date();
+    const date = new Date(dateString);
+    const formattedDate = date.toISOString().split('T')[0];
+    for (let i = 0; i < carts.length; i++) {
+      const oderData = new orderModel({
+        food_id: carts[i].food_id,
+        user_id: carts[i].user_id,
+        restaurant_id: carts[i].restaurant_id,
+        name: req.body.name,
+        phone: req.body.phone,
+        train_no: req.body.train_no,
+        seat_no: req.body.seat_no,
+        time: req.body.time,
+        date: formattedDate,
+        food_price: food_price,
+        totalAmount: totalAmount,
+        status: 0,
+      });
+
+      datas.push(await oderData.save());
+    }
+
+
+    const cart_data = await cartModel.updateMany({ user_id: id }, { $set: { status: 1 } })
+
+    res.status(201).json({
+      success: true, error: false,
+      message: 'Order completed'
+    })
+
   }
-});
+  catch (err) {
+    res.status(500).json({ success: false, error: true, message: 'Something Went Wrong' })
+    console.log(err)
+  }
+})
 
 
 
