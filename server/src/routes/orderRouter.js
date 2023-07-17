@@ -12,7 +12,7 @@ orderRouter.get('/quantity-decrement/:id', async (req, res) => {
   try {
     const id = req.params.id
     const old = await cartModel.findOne({ _id: id })
-    const counts = old.count + 1
+    const counts = parseInt(old.quantity) + 1
 
     const add = await cartModel.updateOne({ _id: id }, { $set: { quantity: counts } })
 
@@ -41,7 +41,7 @@ orderRouter.get('/quantity-increment/:id', async (req, res) => {
   try {
     const id = req.params.id
     const old = await cartModel.findOne({ _id: id })
-    const counts = old.count + 1
+    const counts = parseInt(old.quantity) + 1
 
     const add = await cartModel.updateOne({ _id: id }, { $set: { quantity: counts } })
 

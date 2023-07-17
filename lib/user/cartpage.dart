@@ -231,27 +231,6 @@ class _CartState extends State<Cart> {
 
         SizedBox(height: 4.0),
 
-   /*     IconButton(
-          onPressed: () {
-            Alert(
-              context: context,
-              title: "Successfully deleted",
-              content: Icon(Icons.check_circle),
-              buttons: [
-                DialogButton(
-                  child: Text(
-                    "OK",
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Cart())),
-                  color: Colors.blueAccent,
-                  radius: BorderRadius.circular(0.0),
-                ),
-              ],
-            ).show();
-          },
-          icon: Icon(Icons.delete, color: Colors.blueAccent),
-        ),*/
         Column(
           children: [
             IconButton(
@@ -259,7 +238,6 @@ class _CartState extends State<Cart> {
                 Icons.delete,
               ),
               onPressed: () async {
-                Id = snapshot.data![index].id;
                 setState(() {
                   _deleteData(snapshot.data![index].id);
                 });
@@ -273,7 +251,6 @@ class _CartState extends State<Cart> {
                   height: 30,
                   child: FloatingActionButton(
                     onPressed: () async {
-                      Id = snapshot.data![index].id;
                       setState(() {
                         _decrement(snapshot.data![index].id);
                       });
@@ -287,7 +264,7 @@ class _CartState extends State<Cart> {
                   width: 10,
                 ),
                 Text(
-                 " 1",
+                  snapshot.data![index].quantity,
                 ),
                 SizedBox(
                   width: 10,
@@ -297,7 +274,6 @@ class _CartState extends State<Cart> {
                   height: 30,
                   child: FloatingActionButton(
                     onPressed: () async {
-                      Id =snapshot.data![index].id;
                       setState(() {
                         _increment(snapshot.data![index].id);
                       });
