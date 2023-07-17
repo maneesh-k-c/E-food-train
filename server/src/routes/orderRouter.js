@@ -256,6 +256,7 @@ orderRouter.post('/save-order/:id', async (req, res) => {
     for (let i = 0; i < carts.length; i++) {
       totalAmount += carts[i].food_price;
     }
+    console.log(totalAmount);
     const datas = [];
     const dateString = new Date();
     const date = new Date(dateString);
