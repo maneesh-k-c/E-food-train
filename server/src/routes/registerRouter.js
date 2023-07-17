@@ -127,7 +127,7 @@ registerRouter.post('/restaurant-register', async function (req, res) {
       username: req.body.user_name,
       password: req.body.password,
       role: 2,
-      status: '1',
+      status: '0',
     }
     const save_login = await loginModel(log_data).save()
     if (save_login) {
