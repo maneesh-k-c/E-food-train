@@ -1,8 +1,15 @@
+import 'dart:convert';
+
+import 'package:efoodtrain/API/api.dart';
+import 'package:efoodtrain/API/api_service.dart';
 import 'package:efoodtrain/Restaurant/restpayment.dart';
+import 'package:efoodtrain/user/model/cartmodel.dart';
 import 'package:efoodtrain/user/payment.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:quantity_input/quantity_input.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'orderitems.dart';
 
@@ -18,13 +25,130 @@ final List<String> containerImages = [
   'images/cn.png',
   'images/dosa.png',
 ];
- List<String> imageTitles = ["CB", "Porotta", "Masaladosa","Noodles",];
-final List<String> Titles = ["Rs100", "Rs35", "Rs120", "Rs60"];
-final List<String> qty = ["4", "6", "1", "3"];
-int simpleIntInput = 0;
- List<String> entries = <String>[' CB', 'Porotta', 'Masaladosa','Noodles',];
-final List<String> prices=['150','10','60','120',];
 class _CartState extends State<Cart> {
+  String Id='';
+  @override
+  ApiService client=ApiService();
+  late SharedPreferences prefs;
+  String user_id='';
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchcart();
+  }
+  Future<List<CartModel>> fetchcart() async {
+    prefs = await SharedPreferences.getInstance();
+    user_id = (prefs.getString('user_id') ?? '');
+    print("uid${user_id}");
+    var response = await Api().getData('/order/view-cart/'+user_id.replaceAll('"', ''));
+    if (response.statusCode == 200) {
+      var items = json.decode(response.body);
+      print(("items${items}"));
+
+      List<CartModel> products = List<CartModel>.from(
+          items['data'].map((e) => CartModel.fromJson(e)).toList());
+      return products;
+    } else {
+      List<CartModel> products = [];
+      return products;
+    }
+  }
+
+  _deleteData(String id) async {
+    var res =
+    await Api().getData('/api/cart/delete_cart/' + id.replaceAll('"', ''));
+    if (res.statusCode == 200) {
+      setState(() {
+        Alert(
+          context: context,
+          title: "Successfully deleted",
+          content: Icon(Icons.check_circle),
+          buttons: [
+            DialogButton(
+              child: Text(
+                "OK",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+              onPressed: () =>  Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) => Cart())),
+              color: Colors.blueAccent,
+              radius: BorderRadius.circular(0.0),
+            ),
+          ],
+        ).show();
+
+
+        Fluttertoast.showToast(
+          msg: "Removed from cart",
+          backgroundColor: Colors.grey,
+
+        );
+      });
+    } else {
+      setState(() {
+        Fluttertoast.showToast(
+          msg: "Currently there is no data available",
+          backgroundColor: Colors.grey,
+        );
+      });
+    }
+  }
+
+  _increment(String id) async {
+    setState(() {
+      var _isLoading = true;
+    });
+
+    var res =
+    await Api().getData('/order/quantity-increment/' + id.replaceAll('"', ''));
+    var body = json.decode(res.body);
+    print(body);
+    if (body['success'] == true) {
+      print(body);
+      setState(() {
+        // qty++;
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => Cart()));
+      });
+      // Fluttertoast.showToast(
+      //   msg: body['message'].toString(),
+      //   backgroundColor: Colors.grey,
+      // );
+    } else {
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+    }
+  }
+
+  _decrement(String id) async {
+    setState(() {
+      var _isLoading = true;
+    });
+
+    var res =
+    await Api().getData('/order/quantity-decrement/' + id.replaceAll('"', ''));
+    var body = json.decode(res.body);
+    print(body);
+    if (body['success'] == true) {
+      print(body);
+      setState(() {
+        //  qty--;
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => Cart()));
+      });
+      // Fluttertoast.showToast(
+      //   msg: body['message'].toString(),
+      //   backgroundColor: Colors.grey,
+      // );
+    } else {
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,13 +172,21 @@ class _CartState extends State<Cart> {
       // other stuff
     ),
         body: SingleChildScrollView(
+          physics: ScrollPhysics(),
         child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
         Text("My Cart",
         style: TextStyle(fontWeight: FontWeight.w400, fontSize: 35,color: Colors.black)),
-    ListView.separated(
+            FutureBuilder<List<CartModel>>(
+            future: fetchcart(),
+    builder: (BuildContext cfetchproductontext,
+    AsyncSnapshot<List<CartModel>> snapshot) {
+
+    if (snapshot.hasData) {
+    return ListView.separated(
+      physics: NeverScrollableScrollPhysics(),
 
     shrinkWrap: true,
     separatorBuilder: (context, index) {
@@ -63,12 +195,12 @@ class _CartState extends State<Cart> {
     );
     },
     //   scrollDirection: Axis.vertical,
-    itemCount: 4,
+    itemCount:snapshot.data!.length,
     itemBuilder: (context, index) {
     return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Card(
-      color: Colors.grey.withOpacity(0.5),
+      color: Colors.white.withOpacity(0.5),
     child: Container(
       child: Padding(
       padding: const EdgeInsets.all(10),
@@ -77,35 +209,29 @@ class _CartState extends State<Cart> {
       crossAxisAlignment: CrossAxisAlignment.center,
       // mainAxisSize: MainAxisSize.min,
       children: [
-      CircleAvatar(backgroundImage:AssetImage('${containerImages[index]}')
+      CircleAvatar(backgroundImage:AssetImage( "server/public/images/" +snapshot.data![index].imageUrl
+          )
 
 
 
       // child: Image.asset(containerImages[index],fit: BoxFit.cover,),
-      ),/*Container(
-                                    width: 80,
-                                    child: Image.asset(containerImages[index],
-                                        fit: BoxFit.cover),
-                                  ),*/
-
+      ),
       Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-      Text("${imageTitles[index]}"
+      Text("${snapshot.data![index].name}"
       ),
-      Text("${Titles[index]}"
+      Text("₹${snapshot.data![index].price}"
       ),
-        Text("Qty :${qty[index]}"
+        Text("Qty :${snapshot.data![index].quantity}"
         ),
       ],
       ),
 
-        QuantityInput(
-            value: simpleIntInput,
-            onChanged: (value) => setState(() => simpleIntInput = int.parse(value.replaceAll(',', '')))
-        ),
+
         SizedBox(height: 4.0),
 
-        IconButton(
+   /*     IconButton(
           onPressed: () {
             Alert(
               context: context,
@@ -125,15 +251,79 @@ class _CartState extends State<Cart> {
             ).show();
           },
           icon: Icon(Icons.delete, color: Colors.blueAccent),
-        ),
-      ]),
+        ),*/
+        Column(
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.delete,
+              ),
+              onPressed: () async {
+                Id = snapshot.data![index].id;
+                setState(() {
+                  _deleteData(Id);
+                });
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      Id = snapshot.data![index].id;
+                      setState(() {
+                        _decrement(Id);
+                      });
+                    },
+                    backgroundColor: Colors.white60,
+                    child:
+                    Icon(Icons.remove, color: Colors.black),
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(
+                 " 1",
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Container(
+                  width: 30,
+                  height: 30,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      Id =snapshot.data![index].id;
+                      setState(() {
+                        _increment(Id);
+                      });
+                    },
+                    backgroundColor: Colors.white60,
+                    child: Icon(Icons.add, color: Colors.black),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        )
+      ]
+      ),
+
       ),
     ),
 
     ),
     );
     },
-    ),
+    );
+    }
+    return Center(child: CircularProgressIndicator());
+    },
+            ),
           Padding(
             padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
             child: TextField(

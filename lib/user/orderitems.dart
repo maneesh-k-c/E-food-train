@@ -65,7 +65,7 @@ class _OrderState extends State<Order> {
     }*/
   }
 
-  Future AddCart() async {
+  Future AddCart(String id) async {
     localstorage = await SharedPreferences.getInstance();
     user_id = (localstorage.getString('user_id') ?? '');
     print('User ID ${user_id}');
@@ -75,7 +75,7 @@ class _OrderState extends State<Order> {
 
     var data = {
       "user_id": user_id.replaceAll('"', ''),
-      "food_id": foodid.replaceAll('"', ''),
+      "food_id":id.replaceAll('"', ''),
       "restaurant_id": widget.id,
     };
     print(data);
@@ -100,7 +100,9 @@ print(body);
                   color: Colors.white, fontSize: 20),
             ),
             onPressed:
-                () {}, //Navigator.push(context, MaterialPageRoute(builder:(context)=> Order())),
+                () {
+                  Navigator.push(context as BuildContext, MaterialPageRoute(builder: (context)=>Order(id: widget.id,)));
+                }, //Navigator.push(context, MaterialPageRoute(builder:(context)=> Order())),
             color: Colors.blueAccent,
             radius: BorderRadius.circular(0.0),
           ),
@@ -194,7 +196,7 @@ print(body);
                     SizedBox(height: 4.0),
                     ElevatedButton(
                       onPressed: () {
-                        AddCart();
+                        AddCart(_loaddata[index]['_id']);
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(

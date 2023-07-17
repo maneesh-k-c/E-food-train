@@ -7,6 +7,7 @@ import 'package:efoodtrain/admin/model/deliveryboymodel.dart';
 import 'package:efoodtrain/admin/model/itemmodel.dart';
 import 'package:efoodtrain/admin/model/restmodel.dart';
 import 'package:efoodtrain/admin/model/usermodel.dart';
+import 'package:efoodtrain/user/model/cartmodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:trip/Admin/model/categoryModel.dart';
