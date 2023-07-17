@@ -2,9 +2,70 @@ const express = require('express');
 const orderModel = require('../models/orderModel');
 const cartModel = require('../models/carttModel');
 const mongoose = require('mongoose');
+const food_itemModel = require('../models/food_itemModel');
+
 const obj = mongoose.Types.ObjectId
 
 const orderRouter = express.Router();
+
+orderRouter.get('/quantity-decrement/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const old = await cartModel.findOne({ _id: id })
+    const counts = old.count + 1
+
+    const add = await cartModel.updateOne({ _id: id }, { $set: { count: counts } })
+
+    if (add.modifiedCount === 1) {
+      const old_product = await food_itemModel.findOne({ _id: old.food_id })
+      const available_counts = parseInt(old_product.quantity) + 1
+      const products = await food_itemModel.updateOne({ _id: old.food_id }, { $set: { quantity: available_counts } })
+
+      return res.status(201).json({
+        success: true, error: false,
+        message: "Quantity incremented"
+      })
+    } else {
+      return res.status(400).json({
+        success: false, error: true,
+        message: "error"
+      })
+    }
+  }
+  catch (err) {
+    res.status(500).json({ success: false, error: true, message: 'Something Went Wrong' })
+    console.log(err)
+  }
+})
+orderRouter.get('/quantity-increment/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const old = await cartModel.findOne({ _id: id })
+    const counts = old.count + 1
+
+    const add = await cartModel.updateOne({ _id: id }, { $set: { count: counts } })
+
+    if (add.modifiedCount === 1) {
+      const old_product = await food_itemModel.findOne({ _id: old.food_id })
+      const available_counts = parseInt(old_product.quantity) - 1
+      const products = await food_itemModel.updateOne({ _id: old.food_id }, { $set: { quantity: available_counts } })
+
+      return res.status(201).json({
+        success: true, error: false,
+        message: "Quantity incremented"
+      })
+    } else {
+      return res.status(400).json({
+        success: false, error: true,
+        message: "error"
+      })
+    }
+  }
+  catch (err) {
+    res.status(500).json({ success: false, error: true, message: 'Something Went Wrong' })
+    console.log(err)
+  }
+})
 
 orderRouter.get('/delete-cart/:id', async function (req, res) {
   try {
@@ -100,6 +161,17 @@ orderRouter.get('/view-cart/:id', async function (req, res) {
         }
       }
     ])
+
+    allUser.forEach((item) => {
+      item.total = item.price * item.quantity;
+    });
+
+    let totalPrice = 0;
+  
+  for (let i = 0; i < allUser.length; i++) {
+    totalPrice += allUser[i].total;
+  }
+
     if (!allUser) {
       return res.status(400).json({
         success: false,
@@ -110,7 +182,9 @@ orderRouter.get('/view-cart/:id', async function (req, res) {
     return res.status(200).json({
       success: true,
       error: false,
-      data: allUser
+      totalPrice:totalPrice,
+      data: allUser,
+     
     })
 
 
