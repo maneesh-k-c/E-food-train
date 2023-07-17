@@ -261,7 +261,7 @@ class _CartState extends State<Cart> {
               onPressed: () async {
                 Id = snapshot.data![index].id;
                 setState(() {
-                  _deleteData(Id);
+                  _deleteData(snapshot.data![index].id);
                 });
               },
             ),
@@ -275,7 +275,7 @@ class _CartState extends State<Cart> {
                     onPressed: () async {
                       Id = snapshot.data![index].id;
                       setState(() {
-                        _decrement(Id);
+                        _decrement(snapshot.data![index].id);
                       });
                     },
                     backgroundColor: Colors.white60,
@@ -299,7 +299,7 @@ class _CartState extends State<Cart> {
                     onPressed: () async {
                       Id =snapshot.data![index].id;
                       setState(() {
-                        _increment(Id);
+                        _increment(snapshot.data![index].id);
                       });
                     },
                     backgroundColor: Colors.white60,
