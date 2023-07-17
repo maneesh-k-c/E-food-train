@@ -271,7 +271,7 @@ orderRouter.post('/save-order/:id', async (req, res) => {
         seat_no: req.body.seat_no,
         time: req.body.time,
         date: formattedDate,
-        food_price: food_price,
+        food_price: carts[i].food_price,
         totalAmount: totalAmount,
         status: 0,
       });

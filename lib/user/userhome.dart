@@ -2,6 +2,7 @@ import 'package:efoodtrain/login.dart';
 import 'package:efoodtrain/pantry/managefood.dart';
 import 'package:efoodtrain/pantry/orderfood.dart';
 import 'package:efoodtrain/pantry/viewfood.dart';
+import 'package:efoodtrain/user/cartpage.dart';
 import 'package:efoodtrain/user/findrest-food.dart';
 import 'package:efoodtrain/user/orderitems.dart';
 import 'package:efoodtrain/user/usernot.dart';
@@ -192,6 +193,38 @@ class _HomieState extends State<Homie> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: Text("Order Food-Pantry",
+
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20
+                        ),
+                      ),
+                    )
+
+                  ],
+                ),
+
+
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 20,left: 20,right: 20),
+            child: GestureDetector(
+              onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>Cart()));
+              },
+              child: Container(
+
+                height: 100,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),color: Colors.grey.withOpacity(0.4),      ),
+                child: Row(
+
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text("View Cart",
 
                         style: TextStyle(
                             color: Colors.black,

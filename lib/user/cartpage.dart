@@ -19,18 +19,21 @@ class Cart extends StatefulWidget {
   @override
   State<Cart> createState() => _CartState();
 }
-final List<String> containerImages = [
-  'images/biri.png',
-  'images/poro.png',
-  'images/cn.png',
-  'images/dosa.png',
-];
+
 class _CartState extends State<Cart> {
+
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController _userController = TextEditingController();
+  TextEditingController _mobController = TextEditingController();
+  TextEditingController _seatController = TextEditingController();
+  TextEditingController _timeController = TextEditingController();
+  TextEditingController _trainnoController = TextEditingController();
   String Id='';
   @override
   ApiService client=ApiService();
   late SharedPreferences prefs;
   String user_id='';
+  int total=0;
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -44,7 +47,8 @@ class _CartState extends State<Cart> {
     if (response.statusCode == 200) {
       var items = json.decode(response.body);
       print(("items${items}"));
-
+      total=items['totalPrice'];
+      print("TotalAmount${total}");
       List<CartModel> products = List<CartModel>.from(
           items['data'].map((e) => CartModel.fromJson(e)).toList());
       return products;
@@ -56,7 +60,7 @@ class _CartState extends State<Cart> {
 
   _deleteData(String id) async {
     var res =
-    await Api().getData('/api/cart/delete_cart/' + id.replaceAll('"', ''));
+    await Api().getData('/order/delete-cart/' + id.replaceAll('"', ''));
     if (res.statusCode == 200) {
       setState(() {
         Alert(
@@ -149,6 +153,41 @@ class _CartState extends State<Cart> {
       );
     }
   }
+
+  Future PlaceOrders() async {
+    prefs = await SharedPreferences.getInstance();
+    user_id = (prefs.getString('user_id') ?? '');
+    print('login_id_complaint ${user_id}');
+
+    var data = {
+      "name": _userController.text,
+      "phone":_mobController.text,
+      "train_no":_trainnoController.text,
+      "seat_no":_seatController.text,
+      "time":_timeController.text
+    };
+    print(data);
+    var res = await Api().authData(data, '/order/save-order/'+user_id.replaceAll('"', ''));
+    var body = json.decode(res.body);
+    print(body);
+    if (body['success'] == true) {
+
+      Navigator.push(
+        context,MaterialPageRoute(builder: (context)=>Restpay()),);
+      print(body);
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+    }
+    else{
+      Fluttertoast.showToast(
+        msg: body['message'].toString(),
+        backgroundColor: Colors.grey,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -302,85 +341,132 @@ class _CartState extends State<Cart> {
             ),
           Padding(
             padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                  labelText: "Name"
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                  labelText: "Mobile number"
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                  labelText: "Train name/PNR number"
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                  labelText: "Seat number"
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                  labelText: "Time"
-              ),
-            ),
-          ),
-
-          SizedBox(height: 4.0),
-          Container(
-            height: 50,
-            margin: EdgeInsets.symmetric(horizontal: 40),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10,bottom: 10),
-                child: ElevatedButton(
-
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.blueGrey, //background color of button
-                    //border width and color
-                    elevation: 3, //elevation of button
-                    shape: RoundedRectangleBorder( //to set border radius to button
-                        borderRadius: BorderRadius.circular(30)
-                    ),
+            child:  Text("Total Amount  ₹"+ total.toString(),style: TextStyle(fontSize: 20),
+          ),),
+          Form(
+            autovalidateMode: AutovalidateMode.always,
+            key: _formKey,
+            child:   Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
+                child: TextFormField(
+                  controller: _userController,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                      labelText: "Name",
                   ),
-                  onPressed: () {
-                      Navigator.push(
-                        context,MaterialPageRoute(builder: (context)=>Restpay()),);
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter first name';
+                    }
+                    return null;
                   },
-                  child: const Text(
-                    'Order',
-                    style: TextStyle(fontSize: 16,
-                      color: Colors.black,
-                    ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
+                child: TextFormField(
+                  controller: _mobController,
+                  validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter number';
+                  }
+                  return null;
+                },
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                      labelText: "Mobile number"
                   ),
                 ),
               ),
-          ),
+              Padding(
+                padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
+                child: TextFormField(
+                  controller: _trainnoController,
+                  validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter train no';
+                  }
+                  return null;
+                },
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                      labelText: "Train No/PNR number"
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
+                child: TextFormField(
+                  controller: _seatController,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter seat no';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                      labelText: "Seat number"
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 35.0,right: 35.0,bottom: 10),
+                child: TextFormField(
+                  controller:_timeController,
+                  validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter time';
+                  }
+                  return null;
+                },
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                      labelText: "Time"
+                  ),
+                ),
+              ),
 
-          )
+              SizedBox(height: 4.0),
+              Container(
+                height: 50,
+                margin: EdgeInsets.symmetric(horizontal: 40),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10,bottom: 10),
+                    child: ElevatedButton(
+
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blueGrey, //background color of button
+                        //border width and color
+                        elevation: 3, //elevation of button
+                        shape: RoundedRectangleBorder( //to set border radius to button
+                            borderRadius: BorderRadius.circular(30)
+                        ),
+                      ),
+                      onPressed: () {
+                      PlaceOrders();
+                       },
+                      child: const Text(
+                        'Order',
+                        style: TextStyle(fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              )
+            ],
+          ),)
+
         ],
     ),
 
