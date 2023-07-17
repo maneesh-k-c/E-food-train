@@ -245,16 +245,16 @@ orderRouter.post('/save-order/:id', async (req, res) => {
   try {
     const id = req.params.id
     console.log(id);
-    const carts = await cartModel.find({ user_id: id })
+    const carts = await cartModel.find({ user_id: id, status:0 })
     console.log(carts);
     carts.forEach((item) => {
-      item.food_price = parseInt(item.price) * parseInt(item.quantity);
+      item.food_price = item.price * item.quantity;
     });
 
     let totalAmount = 0;
 
     for (let i = 0; i < carts.length; i++) {
-      totalAmount += parseInt(carts[i].total);
+      totalAmount += carts[i].total;
     }
     const datas = [];
     const dateString = new Date();
