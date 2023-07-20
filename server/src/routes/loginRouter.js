@@ -78,6 +78,7 @@ loginRouter.post('/login', async (req, res) => {
                         error: false,
                         login_id: oldUser._id,
                         deliveryboy_id: deliveryboy._id,
+                        restaurant_id: deliveryboy.restaurant_id,
                         status: oldUser.status,
                         details: oldUser
                     })

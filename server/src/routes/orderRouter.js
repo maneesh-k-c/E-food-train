@@ -239,7 +239,59 @@ orderRouter.post('/add-cart', async function (req, res) {
   }
 });
 
+orderRouter.get('/accept-order/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const approve = await orderModel.updateOne({ _id: id }, { $set: { status: 1 } });
+    console.log(approve);
+    if (approve && approve.modifiedCount === 1) {
+      return res.status(200).json({
+        success: true,
+        message: 'Order taken',
+      });
+    } else if (approve && approve.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order not taken',
+      });
+    } else {
+      throw new Error('Error taking order');
+    }
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Something went wrong',
+      details: error.message,
+    });
+  }
+});
 
+orderRouter.get('/complete-order/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const approve = await orderModel.updateOne({ _id: id }, { $set: { status: 2 } });
+    console.log(approve);
+    if (approve && approve.modifiedCount === 1) {
+      return res.status(200).json({
+        success: true,
+        message: 'Completed',
+      });
+    } else if (approve && approve.modifiedCount === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order not completed',
+      });
+    } else {
+      throw new Error('Error completing the order');
+    }
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: 'Something went wrong',
+      details: error.message,
+    });
+  }
+});
 
 orderRouter.post('/save-order/:id', async (req, res) => {
   try {
@@ -355,6 +407,383 @@ orderRouter.post('/save-order/:id', async (req, res) => {
     console.log(err)
   }
 })
+
+orderRouter.get('/deliveryboy-view-completed-orders/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    console.log(id);
+    const orders = await  orderModel.aggregate([
+      {
+        '$lookup': {
+          'from': 'user_tbs',
+          'localField': 'user_id',
+          'foreignField': '_id',
+          'as': 'user'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'restaurant_tbs',
+          'localField': 'restaurant_id',
+          'foreignField': '_id',
+          'as': 'restaurant'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'food_item_tbs',
+          'localField': 'food_id',
+          'foreignField': '_id',
+          'as': 'food'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'cart_tbs',
+          'localField': 'user_id',
+          'foreignField': 'user_id',
+          'as': 'cart'
+        }
+
+      },
+      {
+        '$unwind': "$user"
+      },
+      {
+        '$unwind': "$food"
+      },
+      {
+        '$unwind': "$restaurant"
+      },
+      {
+        '$unwind': "$cart"
+      },
+      {
+        '$match': {
+          "restaurant_id": new obj(id)
+        }
+      },
+      {
+        '$match': {
+          "status": '2'
+        }
+      },
+      
+      {
+        '$group': {
+          '_id': '$_id',
+          'user_id': { '$first': '$user_id' },
+          'food_id': { '$first': '$food_id' },
+          'restaurant_id': { '$first': '$restaurant_id' },
+          'quantity': { '$first': '$cart.quantity' },
+          'item_name': { '$first': '$food.item_name' },
+          'price': { '$first': '$food.price' },
+          'item_image': { '$first': '$food.item_image' },
+          'status': { '$first': '$status' },
+
+        }
+      }
+    ])
+  
+    if(orders){
+      res.status(201).json({
+        success: true, error: false,
+        data: orders
+      })
+    }
+    
+
+  }
+  catch (err) {
+    res.status(500).json({ success: false, error: true, message: 'Something Went Wrong' })
+    console.log(err)
+  }
+})
+
+orderRouter.get('/deliveryboy-view-ongoing-orders/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    console.log(id);
+    const orders = await  orderModel.aggregate([
+      {
+        '$lookup': {
+          'from': 'user_tbs',
+          'localField': 'user_id',
+          'foreignField': '_id',
+          'as': 'user'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'restaurant_tbs',
+          'localField': 'restaurant_id',
+          'foreignField': '_id',
+          'as': 'restaurant'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'food_item_tbs',
+          'localField': 'food_id',
+          'foreignField': '_id',
+          'as': 'food'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'cart_tbs',
+          'localField': 'user_id',
+          'foreignField': 'user_id',
+          'as': 'cart'
+        }
+
+      },
+      {
+        '$unwind': "$user"
+      },
+      {
+        '$unwind': "$food"
+      },
+      {
+        '$unwind': "$restaurant"
+      },
+      {
+        '$unwind': "$cart"
+      },
+      {
+        '$match': {
+          "restaurant_id": new obj(id)
+        }
+      },
+      {
+        '$match': {
+          "status": '1'
+        }
+      },
+      
+      {
+        '$group': {
+          '_id': '$_id',
+          'user_id': { '$first': '$user_id' },
+          'food_id': { '$first': '$food_id' },
+          'restaurant_id': { '$first': '$restaurant_id' },
+          'quantity': { '$first': '$cart.quantity' },
+          'item_name': { '$first': '$food.item_name' },
+          'price': { '$first': '$food.price' },
+          'item_image': { '$first': '$food.item_image' },
+          'status': { '$first': '$status' },
+
+        }
+      }
+    ])
+  
+    if(orders){
+      res.status(201).json({
+        success: true, error: false,
+        data: orders
+      })
+    }
+    
+
+  }
+  catch (err) {
+    res.status(500).json({ success: false, error: true, message: 'Something Went Wrong' })
+    console.log(err)
+  }
+})
+
+orderRouter.get('/deliveryboy-view-pending-orders/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    console.log(id);
+    const orders = await  orderModel.aggregate([
+      {
+        '$lookup': {
+          'from': 'user_tbs',
+          'localField': 'user_id',
+          'foreignField': '_id',
+          'as': 'user'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'restaurant_tbs',
+          'localField': 'restaurant_id',
+          'foreignField': '_id',
+          'as': 'restaurant'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'food_item_tbs',
+          'localField': 'food_id',
+          'foreignField': '_id',
+          'as': 'food'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'cart_tbs',
+          'localField': 'user_id',
+          'foreignField': 'user_id',
+          'as': 'cart'
+        }
+
+      },
+      {
+        '$unwind': "$user"
+      },
+      {
+        '$unwind': "$food"
+      },
+      {
+        '$unwind': "$restaurant"
+      },
+      {
+        '$unwind': "$cart"
+      },
+      {
+        '$match': {
+          "restaurant_id": new obj(id)
+        }
+      },
+      {
+        '$match': {
+          "status": '0'
+        }
+      },
+      
+      {
+        '$group': {
+          '_id': '$_id',
+          'user_id': { '$first': '$user_id' },
+          'food_id': { '$first': '$food_id' },
+          'restaurant_id': { '$first': '$restaurant_id' },
+          'quantity': { '$first': '$cart.quantity' },
+          'item_name': { '$first': '$food.item_name' },
+          'price': { '$first': '$food.price' },
+          'item_image': { '$first': '$food.item_image' },
+          'status': { '$first': '$status' },
+
+        }
+      }
+    ])
+  
+    if(orders){
+      res.status(201).json({
+        success: true, error: false,
+        data: orders
+      })
+    }
+    
+
+  }
+  catch (err) {
+    res.status(500).json({ success: false, error: true, message: 'Something Went Wrong' })
+    console.log(err)
+  }
+})
+
+orderRouter.get('/restaurant-view-orders/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    console.log(id);
+    const orders = await  orderModel.aggregate([
+      {
+        '$lookup': {
+          'from': 'user_tbs',
+          'localField': 'user_id',
+          'foreignField': '_id',
+          'as': 'user'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'restaurant_tbs',
+          'localField': 'restaurant_id',
+          'foreignField': '_id',
+          'as': 'restaurant'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'food_item_tbs',
+          'localField': 'food_id',
+          'foreignField': '_id',
+          'as': 'food'
+        }
+
+      },
+      {
+        '$lookup': {
+          'from': 'cart_tbs',
+          'localField': 'user_id',
+          'foreignField': 'user_id',
+          'as': 'cart'
+        }
+
+      },
+      {
+        '$unwind': "$user"
+      },
+      {
+        '$unwind': "$food"
+      },
+      {
+        '$unwind': "$restaurant"
+      },
+      {
+        '$unwind': "$cart"
+      },
+      {
+        '$match': {
+          "restaurant_id": new obj(id)
+        }
+      },
+      
+      {
+        '$group': {
+          '_id': '$_id',
+          'user_id': { '$first': '$user_id' },
+          'food_id': { '$first': '$food_id' },
+          'restaurant_id': { '$first': '$restaurant_id' },
+          'quantity': { '$first': '$cart.quantity' },
+          'item_name': { '$first': '$food.item_name' },
+          'price': { '$first': '$food.price' },
+          'item_image': { '$first': '$food.item_image' },
+          'status': { '$first': '$status' },
+
+        }
+      }
+    ])
+  
+    if(orders){
+      res.status(201).json({
+        success: true, error: false,
+        data: orders
+      })
+    }
+    
+
+  }
+  catch (err) {
+    res.status(500).json({ success: false, error: true, message: 'Something Went Wrong' })
+    console.log(err)
+  }
+})
+
+
 
 
 
